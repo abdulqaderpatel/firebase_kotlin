@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "766581282046",
+    "project_id": "kotlinpractice-6dc27",
+    "storage_bucket": "kotlinpractice-6dc27.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766581282046:android:cf21f8bd3cc1b617d941af",
+        "android_client_info": {
+          "package_name": "com.example.firebase_kotlin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5NI1T0rXU1Tmxo1pZ113JZHz_4opPK3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766581282046:android:a572c9b4cfb65fe7d941af",
+        "android_client_info": {
+          "package_name": "com.example.todo_with_navigation_bar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5NI1T0rXU1Tmxo1pZ113JZHz_4opPK3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
