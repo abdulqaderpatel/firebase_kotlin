@@ -7,24 +7,38 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -74,6 +89,38 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
         onResult = { selectedImagePath = it }
     )
 
+    var colors = listOf<Color>(
+        Color.Green,
+        Color.Red,
+        Color.Blue,
+        Color.Yellow,
+        Color.Magenta,
+        Color.LightGray,
+        Color.DarkGray,
+        Color.Cyan
+    )
+
+    var selectedColorIndex by remember {
+        mutableStateOf(Color.Green)
+    }
+
+    var textColors = listOf<Color>(
+        Color.Black,
+        Color.White,
+        Color.White,
+        Color.Black,
+        Color.White,
+        Color.Black,
+        Color.White,
+        Color.Black
+
+
+    )
+
+    var selectedTextColorIndex by remember {
+        mutableStateOf(Color.Black)
+    }
+
     val storage = Firebase.storage
     val storageRef = storage.reference
 
@@ -108,7 +155,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                         modifier = Modifier
                             .width(150.dp)
                             .padding(bottom = 5.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        colors = ButtonDefaults.buttonColors(containerColor = selectedColorIndex),
                         shape = RectangleShape,
                         onClick = {}
 
@@ -133,9 +180,9 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                     }
                     Button(
                         modifier = Modifier
-                            .width(150.dp)
+                            .width(250.dp)
                             .padding(bottom = 5.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        colors = ButtonDefaults.buttonColors(containerColor = selectedColorIndex),
                         shape = RectangleShape,
                         onClick = {
                             buttonLoading = true
@@ -198,17 +245,21 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                         }
 
                     ) {
-                        Text(text = "Add Task")
+                        Text(
+                            text = "Add Task",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = selectedTextColorIndex
+                        )
                     }
                 }
             }
         }
-    }) {
+    }) { pad ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .padding(it), horizontalAlignment = Alignment.CenterHorizontally
+                .padding(pad), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,9 +267,14 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 onValueChange = { title = it },
                 label = {
                     Text(
-                        text = "Enter Title"
+                        text = "Enter Title",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = selectedTextColorIndex
                     )
-                })
+
+                },
+                colors = TextFieldDefaults.textFieldColors(containerColor = selectedColorIndex, textColor = selectedTextColorIndex)
+            )
             Spacer(modifier = Modifier.height(15.dp))
             TextField(
                 modifier = Modifier
@@ -229,19 +285,61 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 singleLine = false,
                 maxLines = 4,
                 label = {
-                    Text(text = "Enter description")
-                }
+                    Text(
+                        text = "Enter Description",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = selectedTextColorIndex
+                    )
+
+                },
+                colors = TextFieldDefaults.textFieldColors(containerColor = selectedColorIndex, textColor = selectedTextColorIndex),
             )
-            Spacer(modifier = Modifier.height(20.dp))
+
+            Spacer(modifier = Modifier.height(15.dp))
             AsyncImage(
                 model = selectedImagePath,
 
                 contentDescription = "poster",
                 modifier = Modifier
 
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .align(Alignment.End),
                 contentScale = ContentScale.Crop
             )
+            Spacer(modifier = Modifier.height(15.dp))
+            LazyRow(modifier = Modifier.height(50.dp))
+            {
+
+
+                itemsIndexed(colors)
+                { index, color ->
+                    var modif = Modifier
+                        .padding(10.dp)
+                        .clickable { selectedColorIndex = color
+                            selectedTextColorIndex = textColors[index]}
+                        .clip(shape = CircleShape)
+                        .size(25.dp)
+                    if (selectedColorIndex.equals(color)) {
+                        modif = Modifier
+                            .padding(4.dp)
+                            .border(border = BorderStroke(color = Color.Black, width = 2.dp))
+                            .clickable {
+                                selectedColorIndex = color
+                                selectedTextColorIndex = textColors[index]
+                            }
+                            .clip(shape = CircleShape)
+                            .size(25.dp)
+                    }
+                    Card(
+                        modifier = modif, colors = CardDefaults.cardColors(containerColor = color)
+                    ) {
+
+                    }
+                }
+            }
         }
+
+
     }
 }
