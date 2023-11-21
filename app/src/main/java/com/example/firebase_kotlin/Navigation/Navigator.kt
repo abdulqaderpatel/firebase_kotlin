@@ -16,10 +16,12 @@ import com.example.firebase_kotlin.Screens.Main.CompletedTodos
 import com.example.firebase_kotlin.Screens.Main.Home
 import com.example.firebase_kotlin.Screens.Main.Profile
 import com.example.firebase_kotlin.Screens.Main.UserNavigation
+import com.example.firebase_kotlin.ViewModels.TodoViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun Navigator(navController: NavHostController,startDestination:String,padding:PaddingValues= PaddingValues(0.dp)) {
+    var todoViewModel=TodoViewModel()
     NavHost(modifier=Modifier.padding(padding),
         navController = navController,
         startDestination = startDestination
@@ -35,11 +37,11 @@ fun Navigator(navController: NavHostController,startDestination:String,padding:P
         }
         composable(NavigationScreens.Home.name)
         {
-            Home(navController = navController)
+            Home(navController = navController,todoViewModel)
         }
         composable(NavigationScreens.CompletedTodos.name)
         {
-            CompletedTodos(navController = navController)
+            CompletedTodos(navController = navController,todoViewModel)
         }
         composable(NavigationScreens.Profile.name)
         {
@@ -51,7 +53,7 @@ fun Navigator(navController: NavHostController,startDestination:String,padding:P
         }
         composable(NavigationScreens.AddTodos.name)
         {
-            AddTodos(navController = navController)
+            AddTodos(navController = navController,todoViewModel)
         }
     }
 }

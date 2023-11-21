@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.firebase_kotlin.Models.Todo
+import com.example.firebase_kotlin.ViewModels.TodoViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -51,7 +52,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTodos(navController: NavController) {
+fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
     var buttonLoading by remember {
         mutableStateOf(false)
     }
@@ -112,15 +113,20 @@ fun AddTodos(navController: NavController) {
                         onClick = {}
 
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(20.dp)
+                        )
                     }
                 } else {
-                    var context= LocalContext.current
+                    var context = LocalContext.current
                     fun getRealPathFromUri(context: Context, uri: Uri): String? {
-                        var filePath: String?=""
+                        var filePath: String? = ""
                         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                             cursor.moveToFirst()
-                            val columnIndex = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
+                            val columnIndex =
+                                cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA)
                             filePath = cursor.getString(columnIndex)
                         }
                         return filePath
@@ -139,7 +145,8 @@ fun AddTodos(navController: NavController) {
 
                                 val imageRef =
                                     storageRef.child("images/${FirebaseAuth.getInstance().currentUser?.uid}/${time}.jpg")
-                                var filePath:String?=getRealPathFromUri(context,selectedImagePath!!)
+                                var filePath: String? =
+                                    getRealPathFromUri(context, selectedImagePath!!)
                                 val file = Uri.fromFile(File(filePath))
 
                                 // Upload the file to Firebase Storage
@@ -157,10 +164,12 @@ fun AddTodos(navController: NavController) {
                                                     title = title,
                                                     description = description,
                                                     id = time.toString(),
-                                                    imageURL = downloadUrl
-                                                )
+                                                    imageURL = downloadUrl,
+
+                                                    )
                                             ).addOnSuccessListener {
                                                 buttonLoading = false
+                                                todoViewModel.isListDataChanged.value = true
                                             }
 
                                     }.addOnFailureListener { exception ->
@@ -179,9 +188,11 @@ fun AddTodos(navController: NavController) {
                                             description = description,
                                             id = time.toString(),
 
+
                                             )
                                     ).addOnSuccessListener {
                                         buttonLoading = false
+                                        todoViewModel.isListDataChanged.value = true
                                     }
                             }
                         }
