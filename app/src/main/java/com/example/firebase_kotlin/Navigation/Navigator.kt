@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.firebase_kotlin.Screens.Authentication.Login
 import com.example.firebase_kotlin.Screens.Authentication.Signup
+import com.example.firebase_kotlin.Screens.Main.AddTodos
 import com.example.firebase_kotlin.Screens.Main.CompletedTodos
 import com.example.firebase_kotlin.Screens.Main.Home
 import com.example.firebase_kotlin.Screens.Main.Profile
@@ -47,6 +48,10 @@ fun Navigator(navController: NavHostController,startDestination:String,padding:P
         composable(NavigationScreens.UserNavigation.name)
         {
             UserNavigation()
+        }
+        composable(NavigationScreens.AddTodos.name)
+        {
+            AddTodos(navController = navController)
         }
     }
 }

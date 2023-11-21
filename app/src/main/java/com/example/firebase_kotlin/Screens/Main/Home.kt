@@ -13,7 +13,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import com.example.firebase_kotlin.Navigation.NavigationScreens
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,8 +25,8 @@ fun Home(navController: NavController) {
 
     Scaffold(floatingActionButton = {
         if(isFABVisible) {
-            FloatingActionButton(
-                onClick = { },
+            FloatingActionButton(containerColor = Color(0xff2F64F9), contentColor = Color.White,
+                onClick = { navController.navigate(NavigationScreens.AddTodos.name)},
             ) {
                 Icon(Icons.Filled.Add, "Floating action button.")
             }
