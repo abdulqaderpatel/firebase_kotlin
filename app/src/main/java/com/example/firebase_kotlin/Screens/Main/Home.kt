@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.example.firebase_kotlin.Constants.Global
 import com.example.firebase_kotlin.Models.Todo
 import com.example.firebase_kotlin.Navigation.NavigationScreens
 import com.example.firebase_kotlin.ViewModels.TodoViewModel
@@ -65,13 +66,15 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                 val description = data?.get("description") as String
                 val imageURL = data?.get("imageURL") as String
                 val completed = data.get("completed") as Boolean
+                val color = data.get("color") as String
                 todoViewModel.todoList.add(
                     Todo(
                         title = title,
                         description = description,
                         id = id,
                         imageURL = imageURL,
-                        completed = completed
+                        completed = completed,
+                        color=color
 
                     )
                 )
@@ -103,7 +106,7 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.LightGray)
+                    colors = CardDefaults.cardColors(containerColor = Global().getContainerColorFromDatabase(item.color))
 
 
                 ) {
@@ -125,10 +128,10 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                                 )
                                 Spacer(modifier = Modifier.width(3.dp))
                             }
-                            Text(text = item.title, style = MaterialTheme.typography.titleMedium)
+                            Text(text = item.title, style = MaterialTheme.typography.titleMedium, color = Global().getTextColorFromDatabase(item.color))
                         }
                         Spacer(modifier = Modifier.height(5.dp))
-                        Text(modifier = Modifier.align(Alignment.Start), text = item.description)
+                        Text(modifier = Modifier.align(Alignment.Start), text = item.description,style = MaterialTheme.typography.titleSmall, color = Global().getTextColorFromDatabase(item.color))
 
 
 

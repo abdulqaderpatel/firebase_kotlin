@@ -5,6 +5,7 @@ data class Todo(
     var title: String,
     var description: String,
     var imageURL: String = "",
-    var completed: Boolean = false
+    var completed: Boolean = false,
+    var color:String
 
 )

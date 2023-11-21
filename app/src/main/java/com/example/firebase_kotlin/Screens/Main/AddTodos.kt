@@ -121,6 +121,10 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
         mutableStateOf(Color.Black)
     }
 
+    var colorIndex by remember {
+        mutableStateOf(0)
+    }
+
     val storage = Firebase.storage
     val storageRef = storage.reference
 
@@ -212,6 +216,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                                     description = description,
                                                     id = time.toString(),
                                                     imageURL = downloadUrl,
+                                                    color = colorIndex.toString()
 
                                                     )
                                             ).addOnSuccessListener {
@@ -234,6 +239,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                             title = title,
                                             description = description,
                                             id = time.toString(),
+                                            color = colorIndex.toString()
 
 
                                             )
@@ -273,7 +279,10 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                     )
 
                 },
-                colors = TextFieldDefaults.textFieldColors(containerColor = selectedColorIndex, textColor = selectedTextColorIndex)
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = selectedColorIndex,
+                    textColor = selectedTextColorIndex
+                )
             )
             Spacer(modifier = Modifier.height(15.dp))
             TextField(
@@ -292,7 +301,10 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                     )
 
                 },
-                colors = TextFieldDefaults.textFieldColors(containerColor = selectedColorIndex, textColor = selectedTextColorIndex),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = selectedColorIndex,
+                    textColor = selectedTextColorIndex
+                ),
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -316,8 +328,11 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 { index, color ->
                     var modif = Modifier
                         .padding(10.dp)
-                        .clickable { selectedColorIndex = color
-                            selectedTextColorIndex = textColors[index]}
+                        .clickable {
+                            selectedColorIndex = color
+                            selectedTextColorIndex = textColors[index]
+                            colorIndex = index+1
+                        }
                         .clip(shape = CircleShape)
                         .size(25.dp)
                     if (selectedColorIndex.equals(color)) {
@@ -327,6 +342,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                             .clickable {
                                 selectedColorIndex = color
                                 selectedTextColorIndex = textColors[index]
+                                colorIndex = index+1
                             }
                             .clip(shape = CircleShape)
                             .size(25.dp)

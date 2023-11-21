@@ -65,13 +65,16 @@ fun CompletedTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 val description = data?.get("description") as String
                 val imageURL = data?.get("imageURL") as String
                 val completed = data.get("completed") as Boolean
+                val color = data.get("color") as Int
                 todoViewModel.todoList.add(
                     Todo(
                         title = title,
                         description = description,
                         id = id,
                         imageURL = imageURL,
-                        completed = completed
+                        completed = completed,
+                        color=color.toString()
+
 
                     )
                 )
