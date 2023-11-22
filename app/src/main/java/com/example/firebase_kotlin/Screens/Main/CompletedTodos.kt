@@ -53,33 +53,37 @@ fun CompletedTodos(navController: NavController, todoViewModel: TodoViewModel) {
 
     var isFABVisible by remember { mutableStateOf(true) }
 
-    if(todoViewModel.isListDataChanged.value) {
+    if (todoViewModel.isListDataChanged.value) {
         LaunchedEffect(Unit)
         {
             todoViewModel.todoList.clear()
             val querySnapshot = FirebaseFirestore.getInstance().collection("Todo").get().await()
             for (document in querySnapshot.documents) {
                 val data = document.data
-                val id = data?.get("id") as String
+                val time = data?.get("time") as String
                 val title = data?.get("title") as String
                 val description = data?.get("description") as String
                 val imageURL = data?.get("imageURL") as String
                 val completed = data.get("completed") as Boolean
                 val color = data.get("color") as Int
+                val userId = data?.get("userId") as String
+                val category = data.get("category") as String
                 todoViewModel.todoList.add(
                     Todo(
                         title = title,
                         description = description,
-                        id = id,
+                        time = time,
                         imageURL = imageURL,
                         completed = completed,
-                        color=color.toString()
+                        color = color.toString(),
+                        category = category,
+                        userId = userId
 
 
                     )
                 )
             }
-            todoViewModel.isListDataChanged.value=false
+            todoViewModel.isListDataChanged.value = false
         }
     }
     Scaffold(floatingActionButton = {
@@ -123,7 +127,6 @@ fun CompletedTodos(navController: NavController, todoViewModel: TodoViewModel) {
                         }
                         Spacer(modifier = Modifier.height(5.dp))
                         Text(modifier = Modifier.align(Alignment.Start), text = item.description)
-
 
 
                     }

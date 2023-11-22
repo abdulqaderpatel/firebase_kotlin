@@ -41,9 +41,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.firebase_kotlin.Constants.Global
+import com.example.firebase_kotlin.Models.Category
 import com.example.firebase_kotlin.Models.Todo
 import com.example.firebase_kotlin.Navigation.NavigationScreens
 import com.example.firebase_kotlin.ViewModels.TodoViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -54,32 +56,51 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
 
     var isFABVisible by remember { mutableStateOf(true) }
 
-    if(todoViewModel.isListDataChanged.value) {
-        LaunchedEffect(Unit)
-        {
+
+    LaunchedEffect(Unit)
+    {
+        if (todoViewModel.isListDataChanged.value) {
             todoViewModel.todoList.clear()
-            val querySnapshot = FirebaseFirestore.getInstance().collection("Todo").get().await()
+            val querySnapshot = FirebaseFirestore.getInstance().collection("Todo")
+                .whereEqualTo("userId", FirebaseAuth.getInstance().currentUser?.uid).get().await()
             for (document in querySnapshot.documents) {
                 val data = document.data
-                val id = data?.get("id") as String
+                val time = data?.get("time") as String
                 val title = data?.get("title") as String
                 val description = data?.get("description") as String
                 val imageURL = data?.get("imageURL") as String
                 val completed = data.get("completed") as Boolean
                 val color = data.get("color") as String
+                val category = data.get("category") as String
+                val userId = data?.get("userId") as String
                 todoViewModel.todoList.add(
                     Todo(
                         title = title,
                         description = description,
-                        id = id,
+                        time = time,
                         imageURL = imageURL,
                         completed = completed,
-                        color=color
+                        color = color,
+                        category = category,
+                        userId = userId
 
                     )
                 )
             }
-            todoViewModel.isListDataChanged.value=false
+            todoViewModel.isListDataChanged.value = false
+            todoViewModel.categoryList.clear()
+            val collectionSnapshot = FirebaseFirestore.getInstance().collection("Category")
+                .whereEqualTo("userId", FirebaseAuth.getInstance().currentUser?.uid).get().await()
+
+            for (document in collectionSnapshot.documents) {
+                val data = document.data
+                val userId = data?.get("userId") as String
+                val category = data?.get("category") as String
+
+                todoViewModel.categoryList.add(
+                    Category(userId = userId, category = category)
+                )
+            }
         }
     }
     Scaffold(floatingActionButton = {
@@ -106,7 +127,11 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = Global().getContainerColorFromDatabase(item.color))
+                    colors = CardDefaults.cardColors(
+                        containerColor = Global().getContainerColorFromDatabase(
+                            item.color
+                        )
+                    )
 
 
                 ) {
@@ -118,7 +143,7 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                     ) {
 
                         Row {
-                            if(item.imageURL!="") {
+                            if (item.imageURL != "") {
                                 Image(
                                     painter = rememberAsyncImagePainter(item.imageURL),
                                     contentDescription = null,
@@ -128,11 +153,19 @@ fun Home(navController: NavController, todoViewModel: TodoViewModel) {
                                 )
                                 Spacer(modifier = Modifier.width(3.dp))
                             }
-                            Text(text = item.title, style = MaterialTheme.typography.titleMedium, color = Global().getTextColorFromDatabase(item.color))
+                            Text(
+                                text = item.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Global().getTextColorFromDatabase(item.color)
+                            )
                         }
                         Spacer(modifier = Modifier.height(5.dp))
-                        Text(modifier = Modifier.align(Alignment.Start), text = item.description,style = MaterialTheme.typography.titleSmall, color = Global().getTextColorFromDatabase(item.color))
-
+                        Text(
+                            modifier = Modifier.align(Alignment.Start),
+                            text = item.description,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Global().getTextColorFromDatabase(item.color)
+                        )
 
 
                     }

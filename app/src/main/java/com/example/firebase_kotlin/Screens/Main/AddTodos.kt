@@ -22,23 +22,32 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,9 +61,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.firebase_kotlin.Models.Category
 import com.example.firebase_kotlin.Models.Todo
 import com.example.firebase_kotlin.ViewModels.TodoViewModel
 import com.google.firebase.Firebase
@@ -63,6 +75,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.time.Instant
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,8 +126,6 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
         Color.Black,
         Color.White,
         Color.Black
-
-
     )
 
     var selectedTextColorIndex by remember {
@@ -128,12 +139,28 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
     val storage = Firebase.storage
     val storageRef = storage.reference
 
+    val scrollState = rememberScrollState()
+
+
+    var mExpanded by remember { mutableStateOf(false) }
+
+
+    val mCities = listOf("Delhi", "Mumbai", "Chennai", "Kolkata", "Hyderabad", "Bengaluru", "Pune")
+
+    var mSelectedText by remember {
+        mutableStateOf(
+            ("Delhi")
+        )
+    }
+
 
 
 
 
     Scaffold(bottomBar = {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
+        ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -212,13 +239,15 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                             .document(time.toString())
                                             .set(
                                                 Todo(
+                                                    userId = FirebaseAuth.getInstance().currentUser?.uid,
                                                     title = title,
                                                     description = description,
-                                                    id = time.toString(),
+                                                    time = Instant.ofEpochMilli(time).toString(),
                                                     imageURL = downloadUrl,
+                                                    category = "work",
                                                     color = colorIndex.toString()
 
-                                                    )
+                                                )
                                             ).addOnSuccessListener {
                                                 buttonLoading = false
                                                 todoViewModel.isListDataChanged.value = true
@@ -238,8 +267,10 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                         Todo(
                                             title = title,
                                             description = description,
-                                            id = time.toString(),
-                                            color = colorIndex.toString()
+                                            time = Instant.ofEpochMilli(time).toString(),
+                                            color = colorIndex.toString(),
+                                            userId = FirebaseAuth.getInstance().currentUser?.uid,
+                                            category = "work",
 
 
                                             )
@@ -261,9 +292,16 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
             }
         }
     }) { pad ->
+        if (todoViewModel.showBottomSheet.value) {
+            BottomSheet(todoViewModel)
+            {
+                todoViewModel.showBottomSheet.value = false
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(state = scrollState)
                 .padding(10.dp)
                 .padding(pad), horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -281,7 +319,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = selectedColorIndex,
-                    textColor = selectedTextColorIndex
+                    focusedTextColor = selectedTextColorIndex
                 )
             )
             Spacer(modifier = Modifier.height(15.dp))
@@ -303,7 +341,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = selectedColorIndex,
-                    textColor = selectedTextColorIndex
+                    focusedTextColor = selectedTextColorIndex
                 ),
             )
 
@@ -315,11 +353,37 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 modifier = Modifier
 
                     .fillMaxWidth()
-                    .height(320.dp)
+
                     .align(Alignment.End),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(15.dp))
+            IconButton(onClick = { mExpanded = !mExpanded }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More"
+                )
+            }
+            DropdownMenu(
+                expanded = mExpanded,
+                onDismissRequest = { mExpanded = false },
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { 200.dp })
+            ) {
+                todoViewModel.categoryList.forEach {
+                    DropdownMenuItem(
+                        text = { Text(it.category) },
+                        onClick = { }
+                    )
+                }
+                IconButton(onClick = { todoViewModel.showBottomSheet.value = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add"
+                    )
+                }
+
+            }
             LazyRow(modifier = Modifier.height(50.dp))
             {
 
@@ -331,18 +395,21 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                         .clickable {
                             selectedColorIndex = color
                             selectedTextColorIndex = textColors[index]
-                            colorIndex = index+1
+                            colorIndex = index + 1
                         }
                         .clip(shape = CircleShape)
                         .size(25.dp)
                     if (selectedColorIndex.equals(color)) {
                         modif = Modifier
                             .padding(4.dp)
-                            .border(border = BorderStroke(color = Color.Black, width = 2.dp))
+                            .border(
+                                border = BorderStroke(color = Color.Black, width = 2.dp),
+                                shape = CircleShape
+                            )
                             .clickable {
                                 selectedColorIndex = color
                                 selectedTextColorIndex = textColors[index]
-                                colorIndex = index+1
+                                colorIndex = index + 1
                             }
                             .clip(shape = CircleShape)
                             .size(25.dp)
@@ -357,5 +424,58 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
         }
 
 
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(
+    todoViewModel: TodoViewModel = viewModel(), onDismiss: () -> Unit
+) {
+    val modalBottomSheetState = rememberModalBottomSheetState()
+    var category by remember {
+        mutableStateOf("")
+    }
+
+
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss() },
+        sheetState = modalBottomSheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+
+        ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TextField(
+                value = category,
+                onValueChange = { category = it },
+                label = { Text("enter category") })
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            Button(onClick = {
+                val time = System.currentTimeMillis()
+                FirebaseFirestore.getInstance().collection("Category").document(time.toString()).set(
+                    Category(
+                        userId = FirebaseAuth.getInstance().currentUser?.uid,
+                        category = category
+                    )
+                ).addOnSuccessListener {
+                    todoViewModel.categoryList.add(
+                        Category(  userId = FirebaseAuth.getInstance().currentUser?.uid,
+                            category = category)
+                    )
+                    todoViewModel.showBottomSheet.value=false
+                }
+
+            }) {
+                Text("Add Category")
+            }
+        }
     }
 }
