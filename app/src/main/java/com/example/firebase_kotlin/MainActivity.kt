@@ -54,7 +54,10 @@ data class BottomNavigationItem(
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
-    @SuppressLint("CoroutineCreationDuringComposition", "UnusedMaterial3ScaffoldPaddingParameter")
+    @SuppressLint(
+        "CoroutineCreationDuringComposition", "UnusedMaterial3ScaffoldPaddingParameter",
+        "SuspiciousIndentation"
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -62,7 +65,7 @@ class MainActivity : ComponentActivity() {
 
             var userViewModel = UserViewModel()
             val navController = rememberNavController()
-          userViewModel.isLoggedIn.value=FirebaseAuth.getInstance().currentUser?.uid!=null
+            userViewModel.isLoggedIn.value = FirebaseAuth.getInstance().currentUser?.uid != null
             when (userViewModel.isLoggedIn.value) {
                 false -> {
 

@@ -80,7 +80,7 @@ import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
+fun AddTodos( todoViewModel: TodoViewModel) {
     var buttonLoading by remember {
         mutableStateOf(false)
     }
@@ -149,7 +149,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
 
     var mSelectedText by remember {
         mutableStateOf(
-            ("Delhi")
+            ("")
         )
     }
 
@@ -244,7 +244,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                                     description = description,
                                                     time = Instant.ofEpochMilli(time).toString(),
                                                     imageURL = downloadUrl,
-                                                    category = "work",
+                                                    category = mSelectedText,
                                                     color = colorIndex.toString()
 
                                                 )
@@ -270,7 +270,7 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                                             time = Instant.ofEpochMilli(time).toString(),
                                             color = colorIndex.toString(),
                                             userId = FirebaseAuth.getInstance().currentUser?.uid,
-                                            category = "work",
+                                            category = mSelectedText,
 
 
                                             )
@@ -358,11 +358,16 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(15.dp))
-            IconButton(onClick = { mExpanded = !mExpanded }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More"
-                )
+            if (mSelectedText == "") {
+                IconButton(onClick = { mExpanded = !mExpanded
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More"
+                    )
+                }
+            } else {
+                Text(modifier = Modifier.clickable { mExpanded = !mExpanded }, text = mSelectedText)
             }
             DropdownMenu(
                 expanded = mExpanded,
@@ -373,10 +378,14 @@ fun AddTodos(navController: NavController, todoViewModel: TodoViewModel) {
                 todoViewModel.categoryList.forEach {
                     DropdownMenuItem(
                         text = { Text(it.category) },
-                        onClick = { }
+                        onClick = {
+                            mSelectedText = it.category
+                            mExpanded = false
+                        }
                     )
                 }
-                IconButton(onClick = { todoViewModel.showBottomSheet.value = true }) {
+                IconButton(onClick = { todoViewModel.showBottomSheet.value = true
+                mExpanded=false}) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add"
@@ -460,18 +469,21 @@ fun BottomSheet(
 
             Button(onClick = {
                 val time = System.currentTimeMillis()
-                FirebaseFirestore.getInstance().collection("Category").document(time.toString()).set(
-                    Category(
-                        userId = FirebaseAuth.getInstance().currentUser?.uid,
-                        category = category
-                    )
-                ).addOnSuccessListener {
-                    todoViewModel.categoryList.add(
-                        Category(  userId = FirebaseAuth.getInstance().currentUser?.uid,
-                            category = category)
-                    )
-                    todoViewModel.showBottomSheet.value=false
-                }
+                FirebaseFirestore.getInstance().collection("Category").document(time.toString())
+                    .set(
+                        Category(
+                            userId = FirebaseAuth.getInstance().currentUser?.uid,
+                            category = category
+                        )
+                    ).addOnSuccessListener {
+                        todoViewModel.categoryList.add(
+                            Category(
+                                userId = FirebaseAuth.getInstance().currentUser?.uid,
+                                category = category
+                            )
+                        )
+                        todoViewModel.showBottomSheet.value = false
+                    }
 
             }) {
                 Text("Add Category")

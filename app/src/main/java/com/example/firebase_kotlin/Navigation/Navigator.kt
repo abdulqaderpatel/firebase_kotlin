@@ -15,14 +15,20 @@ import com.example.firebase_kotlin.Screens.Main.AddTodos
 import com.example.firebase_kotlin.Screens.Main.CompletedTodos
 import com.example.firebase_kotlin.Screens.Main.Home
 import com.example.firebase_kotlin.Screens.Main.Profile
+import com.example.firebase_kotlin.Screens.Main.TodoCategories
 import com.example.firebase_kotlin.Screens.Main.UserNavigation
 import com.example.firebase_kotlin.ViewModels.TodoViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun Navigator(navController: NavHostController,startDestination:String,padding:PaddingValues= PaddingValues(0.dp)) {
-    var todoViewModel=TodoViewModel()
-    NavHost(modifier=Modifier.padding(padding),
+fun Navigator(
+    navController: NavHostController,
+    startDestination: String,
+    padding: PaddingValues = PaddingValues(0.dp)
+) {
+    var todoViewModel = TodoViewModel()
+    NavHost(
+        modifier = Modifier.padding(padding),
         navController = navController,
         startDestination = startDestination
     )
@@ -37,11 +43,11 @@ fun Navigator(navController: NavHostController,startDestination:String,padding:P
         }
         composable(NavigationScreens.Home.name)
         {
-            Home(navController = navController,todoViewModel)
+            Home(navController = navController, todoViewModel)
         }
         composable(NavigationScreens.CompletedTodos.name)
         {
-            CompletedTodos(navController = navController,todoViewModel)
+            CompletedTodos(navController = navController, todoViewModel)
         }
         composable(NavigationScreens.Profile.name)
         {
@@ -53,7 +59,11 @@ fun Navigator(navController: NavHostController,startDestination:String,padding:P
         }
         composable(NavigationScreens.AddTodos.name)
         {
-            AddTodos(navController = navController,todoViewModel)
+            AddTodos(todoViewModel)
+        }
+        composable(NavigationScreens.TodoCategories.name)
+        {
+            TodoCategories(navController = navController, todoViewModel = todoViewModel)
         }
     }
 }

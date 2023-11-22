@@ -81,7 +81,7 @@ fun UserNavigation() {
             items.forEachIndexed { index, item ->
                 NavigationBarItem(colors = androidx.compose.material3.NavigationBarItemDefaults
                     .colors(
-                        selectedTextColor=Color.White,
+                        selectedTextColor = Color.White,
                         indicatorColor = Color(0xff2F64F9),
                     ),
                     selected = selectedItemIndex == index,
@@ -90,7 +90,7 @@ fun UserNavigation() {
                         selectedItemIndex = index
                         when (index) {
                             0 -> {
-                                navController.navigate(NavigationScreens.Home.name)
+                                navController.navigate(NavigationScreens.TodoCategories.name)
                             }
 
                             1 -> {
@@ -124,7 +124,7 @@ fun UserNavigation() {
 
         Navigator(
             navController = navController,
-            startDestination = NavigationScreens.Home.name,
+            startDestination = NavigationScreens.TodoCategories.name,
             padding = it
         )
 
